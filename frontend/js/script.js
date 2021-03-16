@@ -34,6 +34,116 @@ window.addEventListener('load', () => {
 });
 
 
-function buscarPaises(){
+async function buscarPaises(){
     console.log('Teste de funcao!');
+    const resource = await fetch('https://restcountries.eu/rest/v2/all');
+    const listaFormatoJson = await resource.json();
+
+    listaTodosPaises = listaFormatoJson.map(pais =>{
+        const { numericCode, translations, population, flag} = pais;
+
+        return{
+            id:numericCode,
+            name: translations.pt,
+            population: population,
+            //formattedPopulation: formatacaoNumeros(population),
+            flag:flag
+        };
+    });
+    //console.log(listaTodosPaises);
+    render();
 }
+
+function render(){
+   renderizarListaPaises();
+
+   renderizarListaFavoritos();
+
+   renderizarSomatorioPopulacao();
+
+   renderizarBotoesListaPaises();
+
+}
+
+function renderizarListaPaises(){
+console.log('Renderizando lista de Paises');
+
+let paisesHTML = "<div>";
+
+listaTodosPaises.forEach(pais => {
+    const {name, flag, id, population, formattedPopulation} = pais;
+
+    const paisHTML = `
+        <div class='pais'>
+            <!--Div Relacionada ao Botão da Lista-->
+            <div>
+            <a id="${id} class="waves-effect waves-light btn">+</a>
+            </div>
+
+            <!--Div Relacionada a Badeira do Pais-->
+            <div>
+            <img src="${flag}" alt="${name}">
+            </div>
+
+            <!--Div Relacionada aos dados do Pais-->
+            <div>
+                <ul>
+                    <li>${name}</li>
+                    <li>${population}</li>
+                </ul>
+            </div>
+        </div>
+    `;
+    paisesHTML =  paisesHTML + paisHTML;
+});
+
+paisesHTML = paisesHTML + '</div>';
+abaPaises.innerHTML = paisesHTML;
+
+}
+
+function renderizarListaFavoritos(){
+    let favoritosHTML = "<div>";
+
+    listaPaisesFavoritos.forEach(pais => {
+        const {name, flag, id, population, formattedPopulation} = pais;
+
+        const favoritoHTML = `
+            <div class='pais'>
+                <!--Div Relacionada ao Botão da Lista-->
+                <div>
+                    <a id="${id} class="waves-effect waves-light btn">-</a>
+                </div>
+
+                <!--Div Relacionada a Badeira do Pais-->
+                <div>
+                <img src="${flag}" alt="${name}">
+                </div>
+
+                <!--Div Relacionada aos dados do Pais-->
+                <div>
+                    <ul>
+                        <li>${name}<li>
+                        <li>${population}</li>
+                    </ul>
+                </div>
+
+        `;
+
+        favoritoHTML = favoritoHTML + favoritoHTML;
+    })
+
+    favoritosHTML = favoritosHTML + '</div>';
+    abaFavorios.innerHTML = favoritosHTML;
+
+}
+
+function renderizarSomatorioPopulacao(){
+
+}
+
+function renderizarBotoesListaPaises(){
+
+}
+
+

@@ -3,7 +3,7 @@
 
 //Esta parte se refere ao Estado da Aplicação
 let abaPaises = null;
-let abaFavorios = null;
+let abaFavoritos = null;
 
 let listaTodosPaises = [];
 let listaPaisesFavoritos = [];
@@ -14,13 +14,13 @@ let quantidadePaisesFavoritos = 0;
 let listaPopulacaoTotal = 0;
 let listaPopulacaoTotalFavoritos = 0;
 
-let formatacaoNumeros = null;
+let numeroFormatado = null;
 
 console.log("Pagina Carregada!");
 
 window.addEventListener('load', () => {
     abaPaises = document.querySelector('#abaPaises');
-    abaFavorios = document.querySelector('#abaFavoritos');
+    abaFavoritos = document.querySelector('#abaFavoritos');
 
     quantidadeDePaises = document.querySelector('#quantidadeDePaises');
     quantidadePaisesFavoritos = document.querySelector('#quantidadePaisesFavoritos');
@@ -28,14 +28,14 @@ window.addEventListener('load', () => {
     listaPopulacaoTotal = document.querySelector('#listaPopulacaoTotal');
     listaPopulacaoTotalFavoritos = document.querySelector('#listaPopulacaoTotalPaisesFavoritos');
 
-    formatacaoNumeros = Intl.NumberFormat('pt-BR');
+    numeroFormatado = Intl.NumberFormat('pt-BR');
 
     buscarPaises();
 });
 
 
 async function buscarPaises(){
-    console.log('Teste de funcao!');
+
     const resource = await fetch('https://restcountries.eu/rest/v2/all');
     const listaFormatoJson = await resource.json();
 
@@ -46,11 +46,11 @@ async function buscarPaises(){
             id:numericCode,
             name: translations.pt,
             population: population,
-            //formattedPopulation: formatacaoNumeros(population),
+            formattedPopulation: formatacaoNumeros(population),
             flag:flag
         };
     });
-    //console.log(listaTodosPaises);
+
     render();
 }
 
@@ -66,7 +66,6 @@ function render(){
 }
 
 function renderizarListaPaises(){
-console.log('Renderizando lista de Paises');
 
 let paisesHTML = "<div>";
 
@@ -77,7 +76,7 @@ listaTodosPaises.forEach(pais => {
         <div class='pais'>
             <!--Div Relacionada ao Botão da Lista-->
             <div>
-            <a id="${id} class="waves-effect waves-light btn">+</a>
+            <a id="${id}" class="waves-effect waves-light btn">+</a>
             </div>
 
             <!--Div Relacionada a Badeira do Pais-->
@@ -89,7 +88,7 @@ listaTodosPaises.forEach(pais => {
             <div>
                 <ul>
                     <li>${name}</li>
-                    <li>${population}</li>
+                    <li>${formattedPopulation}</li>
                 </ul>
             </div>
         </div>
@@ -103,16 +102,16 @@ abaPaises.innerHTML = paisesHTML;
 }
 
 function renderizarListaFavoritos(){
-    let favoritosHTML = "<div>";
+    let favoritosHTML = '<div>';
 
-    listaPaisesFavoritos.forEach(pais => {
+    listaPaisesFavoritos.forEach( pais => {
         const {name, flag, id, population, formattedPopulation} = pais;
 
-        const favoritoHTML = `
+        const paisfavoritoHTML = `
             <div class='pais'>
                 <!--Div Relacionada ao Botão da Lista-->
                 <div>
-                    <a id="${id} class="waves-effect waves-light btn">-</a>
+                    <a id="${id}" class="waves-effect waves-light btn red darken-4">-</a>
                 </div>
 
                 <!--Div Relacionada a Badeira do Pais-->
@@ -123,27 +122,86 @@ function renderizarListaFavoritos(){
                 <!--Div Relacionada aos dados do Pais-->
                 <div>
                     <ul>
-                        <li>${name}<li>
-                        <li>${population}</li>
+                        <li>${name}</li>
+                        <li>${formattedPopulation}</li>
                     </ul>
                 </div>
+            </div>
 
         `;
+        favoritosHTML += paisfavoritoHTML;
+    });
 
-        favoritoHTML = favoritoHTML + favoritoHTML;
-    })
-
-    favoritosHTML = favoritosHTML + '</div>';
-    abaFavorios.innerHTML = favoritosHTML;
-
+    favoritosHTML += '</div>';
+    abaFavoritos.innerHTML = favoritosHTML;
 }
+
 
 function renderizarSomatorioPopulacao(){
+    
+    quantidadeDePaises.textContent = listaTodosPaises.length;
+    quantidadePaisesFavoritos.textContent = listaPaisesFavoritos.length;
+
+    const totalPopulacao = listaTodosPaises.reduce((accumulator, current) => {
+        return accumulator + current.population;
+    }, 0);
+
+    const totalPopulacaoFavoritos = listaPaisesFavoritos.reduce((accumulator, current) => {
+        return accumulator + current.population;
+    } , 0);
+
+    listaPopulacaoTotal.textContent = formatacaoNumeros(totalPopulacao);
+    listaPopulacaoTotalFavoritos.textContent = formatacaoNumeros(totalPopulacaoFavoritos);
 
 }
+
 
 function renderizarBotoesListaPaises(){
+    
+    const botaoPais = Array.from(abaPaises.querySelectorAll('.btn'));
+    const botaoPaisFavorito = Array.from(abaFavoritos.querySelectorAll('.btn'));
+    
+    botaoPais.forEach(button => {
+        button.addEventListener('click', () => adcionarParaFavoritos(button.id));
+    });
 
+    botaoPaisFavorito.forEach(button => {
+        button.addEventListener('click', () => removerDeFavoritos(button.id));
+    });
+    
 }
 
 
+function adcionarParaFavoritos(id){
+    const adcionarPaisParaFavoritos = listaTodosPaises.find(pais => pais.id === id);
+   
+    listaPaisesFavoritos = [... listaPaisesFavoritos, adcionarPaisParaFavoritos];
+
+    listaPaisesFavoritos.sort((a, b) => {
+        return a.name.localeCompare(b.name);
+    });
+
+    listaTodosPaises = listaTodosPaises.filter( pais => pais.id !== id);
+
+    
+    render();
+}
+
+
+function removerDeFavoritos(id){
+    const removerPaisDeFavoritos = listaPaisesFavoritos.find(pais => pais.id === id);
+    
+    listaTodosPaises = [...listaTodosPaises, removerPaisDeFavoritos];
+
+    listaTodosPaises.sort((a, b) => {
+        return a.name.localeCompare(b.name);
+    });
+
+    listaPaisesFavoritos = listaPaisesFavoritos.filter( pais => pais.id !== id);
+
+    render();
+}
+
+function formatacaoNumeros(number) {
+    return numeroFormatado.format(number);
+  }
